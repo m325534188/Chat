@@ -1,0 +1,24 @@
+const express=require('express');
+
+const cors=require('cors');
+const UserRouter=require('./routers/UserRouter');
+const messageRouter=require('./routers/messageRouter');
+const connectDB=require('./configs/db'); 
+const userRouter = require('./routers/UserRouter'); 
+const app=express();
+const PORT=5000;
+
+
+connectDB();
+
+app.use(cors());
+
+app.use(express.json());
+
+app.use('/users', UserRouter);
+
+app.use('/messages', messageRouter); 
+
+app.listen(5000, 'localhost', () => {
+  console.log("Server running on http://localhost:5000");
+});
