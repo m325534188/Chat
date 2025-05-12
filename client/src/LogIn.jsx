@@ -29,7 +29,6 @@ const LogIn = () => {
         localStorage.setItem("user", JSON.stringify({ name: username }));
 
         setUsername(username); 
-        console.log("User data:", username); 
 
 
         navigate("/WebSocketComponent");
@@ -72,6 +71,7 @@ const LogIn = () => {
   
   <button type="submit" className="login-button">Log In</button> 
 </form>
+
 <div className="signup-section">
   <p>?עוד לא רשום</p>
   <Link to="/register">

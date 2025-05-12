@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-
+import { Link } from 'react-router-dom';
+import WebSocketComponent from '../WebSocketComponent'; // Adjust the path as necessary
 const DeleteUser = () => {
   const [users, setUsers] = useState([]);    
   const [loading, setLoading] = useState(true);
@@ -58,7 +59,8 @@ const DeleteUser = () => {
             </div>
           ))
       }
-    </div>
+      <Link to={"WebSocketComponent"}><button >חזרה לצאט</button> </Link>
+   </div>
   );
 };
 

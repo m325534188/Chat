@@ -44,6 +44,7 @@ const WebSocketComponent = () => {
     setWs(socket);
 
     return () => socket.close();
+    console .log("WebSocket closed");
   }, [navigate]);
 
   const handleSend = () => {
@@ -95,7 +96,7 @@ if (!currentUser) {
       ) : (
         <>
           <div className="chat-box">
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "50px" }}>
               {messages.map((msg, index) => (
                 <div
                   key={index}

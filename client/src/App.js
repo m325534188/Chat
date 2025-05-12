@@ -18,6 +18,8 @@ function App() {
     <Route path='/Register' element={<Register/>}/>
     <Route path='/WebSocketComponent' element={<WebSocketComponent/>}/>
     <Route path="/delete" element={<DeleteUser />} />
+    <Route path="/delete/WebSocketComponent" element={<WebSocketComponent />} />
+
   </Routes>
     </>
   );
