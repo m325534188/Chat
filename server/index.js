@@ -1,10 +1,9 @@
 const express=require('express');
 
 const cors=require('cors');
-const UserRouter=require('./routers/UserRouter');
 const messageRouter=require('./routers/messageRouter');
 const connectDB=require('./configs/db'); 
-const userRouter = require('./routers/UserRouter'); 
+const userRouter = require('../routers/userRouter'); 
 const app=express();
 const PORT=5000;
 
