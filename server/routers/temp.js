@@ -4,7 +4,7 @@ const router=express.Router();
 
 const UserServices=require('../Services/UserServices.js');
 
-const User = require('../models/userModel'); 
+const User = require('../models/userModel.js'); 
 
  router.get('/',async(req,res)=>{
      try{
