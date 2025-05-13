@@ -3,7 +3,8 @@ const express=require('express');
 const cors=require('cors');
 const messageRouter=require('./routers/messageRouter');
 const connectDB=require('./configs/db'); 
-const userRouter = require('./routers/temp')
+const userRouter = require('./routers/UserRouter');
+const mongoose = require('mongoose');
 const app=express();
 const PORT=5000;
 
