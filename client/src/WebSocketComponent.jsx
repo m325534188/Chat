@@ -24,7 +24,12 @@ const WebSocketComponent = () => {
         setMessages(savedMessages);
       }
     
-    const socket = new WebSocket("ws://localhost:8080");
+    // const socket = new WebSocket("ws://localhost:8080");
+    // socket.onopen = () => {
+    //   console.log("Connected to server");
+    // };
+
+     const socket = new WebSocket("wss://chat-1-gm0e.onrender.com");
     socket.onopen = () => {
       console.log("Connected to server");
     };
