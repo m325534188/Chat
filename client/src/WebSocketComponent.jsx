@@ -152,65 +152,70 @@ const WebSocketComponent = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [username, setUsername] = useState("");
+  const [hasName, setHasName] = useState(false);
   const [ws, setWs] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || !user.name) {
-      return navigate("/Register");
+    if (user && user.name) {
+      setUsername(user.name);
+      setHasName(true);
+    } else {
+      navigate("/Register");
+      return;
     }
 
-    setUsername(user.name);
-
     const savedMessages = JSON.parse(localStorage.getItem("messages"));
-    if (Array.isArray(savedMessages)) {
+    if (savedMessages && Array.isArray(savedMessages)) {
       setMessages(savedMessages);
     }
 
     const socket = new WebSocket("wss://chat-1-gm0e.onrender.com");
 
     socket.onopen = () => {
-      console.log("✅ WebSocket connected");
+      console.log("Connected to server");
     };
 
     socket.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        if (msg.sender && msg.message) {
-          setMessages((prev) => {
-            const updated = [...prev, msg];
-            localStorage.setItem("messages", JSON.stringify(updated));
-            return updated;
-          });
-        }
-      } catch (err) {
-        console.error("Error parsing message:", err);
-      }
+      const msg = JSON.parse(event.data);
+      setMessages((prev) => {
+        const updated = [...prev, msg];
+        localStorage.setItem("messages", JSON.stringify(updated));
+        return updated;
+      });
     };
 
-    socket.onerror = (err) => {
-      console.error("WebSocket error:", err);
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
     };
 
     setWs(socket);
 
-    return () => {
-      console.log("🔌 WebSocket closed");
-      socket.close();
-    };
-  }, []);
+    return () => socket.close();
+  }, [navigate]);
 
   const handleSend = () => {
-    if (!input.trim() || !username || !ws || ws.readyState !== WebSocket.OPEN) return;
+    const trimmed = input.trim();
+    if (!trimmed || !username || !ws) return;
 
     const msgObject = {
       sender: username,
       receiver: "general",
-      message: input.trim(),
+      message: trimmed,
     };
 
+    // שולח לשרת
     ws.send(JSON.stringify(msgObject));
+
+    // מוסיף מיד למסך שלך
+    setMessages((prev) => {
+      const updated = [...prev, msgObject];
+      localStorage.setItem("messages", JSON.stringify(updated));
+      return updated;
+    });
+
+    // מנקה את האינפוט
     setInput("");
   };
 
@@ -230,40 +235,47 @@ const WebSocketComponent = () => {
       <h2>Real-Time Chat</h2>
       <p>{username}</p>
 
-      <div className="chat-box">
-        <div style={{ marginTop: "50px" }}>
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`message-bubble ${msg.sender === username ? "sent" : "received"}`}
-            >
-              <div>
-                <strong>{msg.sender}</strong>
-                <br />
-                {msg.message}
-              </div>
+      {hasName ? (
+        <>
+          <div className="chat-box">
+            <div style={{ marginTop: "50px" }}>
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`message-bubble ${
+                    msg.sender === username ? "sent" : "received"
+                  }`}
+                >
+                  <div>
+                    <strong>{msg.sender}</strong>
+                    <br />
+                    {msg.message}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div>
-          <input
-            type="text"
-            placeholder="הקלד הודעה"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSend();
-              }
-            }}
-          />
-        </div>
-      </div>
-
-      <button onClick={handleLogout}>התנתק</button>
-      <br />
-      <button onClick={clearChat}>נקה שיחה</button>
+            <div>
+              <input
+                type="text"
+                placeholder="הקלד הודעה"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <button onClick={handleLogout}>התנתק</button>
+          <br />
+          <button onClick={clearChat}>נקה שיחה</button>
+        </>
+      ) : (
+        <p>טוען שם משתמש...</p>
+      )}
     </div>
   );
 };
