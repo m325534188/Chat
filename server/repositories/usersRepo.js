@@ -1,6 +1,6 @@
 
 const User = require('../models/userModel');
-console.log("✅ הקובץ UserServices.js נטען מחדש");
+console.log(" The file UserServices.js has been reloaded");
 
 // Get All
 const getAllUsers = (filter) => {

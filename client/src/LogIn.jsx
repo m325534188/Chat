@@ -12,71 +12,69 @@ const LogIn = () => {
     e.preventDefault(); 
 
     try {
-      const response = await fetch("http://localhost:5000/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch("/users/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, password }),
+});
       
       const data = await response.json();
 
+
       if (response.ok) {
-        alert("התחברת בהצלחה!");
+        alert("You have successfully connected !");
 
         console.log("User data:", username); 
-        localStorage.setItem("user", JSON.stringify({ name: username }));
+        sessionStorage.setItem("user", JSON.stringify({ name: username }));
 
         setUsername(username); 
 
 
         navigate("/WebSocketComponent");
       } else {
-        alert(data.message || "שגיאה בהתחברות");
+        alert(data.message || "Error occurred while logging in");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("שגיאה בשרת");
+      alert("Error on server");
     }
   };
 
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>כניסה לאתר</h2>
+        <h2>Enter</h2>
         <form onSubmit={handleSubmit}>
   <div className="input-group">
-    <label htmlFor="username">שם משתמש</label>
+    <label htmlFor="username">Username</label>
     <input
       type="text"
       id="username"
       value={username}
       onChange={(e) => setUsername(e.target.value)}
-      placeholder="הכנס שם משתמש"
+      placeholder="Enter username"
       required
     />
   </div>
   <div className="input-group">
-    <label htmlFor="password">סיסמא</label>
+    <label htmlFor="password">Password</label>
     <input
       type="password"
       id="password"
       value={password}
       onChange={(e) => setPassword(e.target.value)}
-      placeholder="הכנס סיסמא"
+      placeholder="Enter password"
       required
     />
   </div>
-  
-  <button type="submit" className="login-button">Log In</button> 
+  <button type="submit" className="login-button">Log In</button>
 </form>
 
 <div className="signup-section">
-  <p>?עוד לא רשום</p>
-  <Link to="/register">
-    <button className="signup-button">Sign Up</button>
-  </Link>
+  <p>?Already registered</p>
+    <Link to="/Register">
+      <button className="signup-button">Sign Up</button>
+    </Link>
 </div>
 
         

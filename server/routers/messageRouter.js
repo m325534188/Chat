@@ -6,7 +6,7 @@ const MessageServices=require('../Services/MessageServices.js');
 
  router.get('/',async(req,res)=>{
      try{
-          console.log("📢 בקשה התקבלה ב- `/Message`");
+          console.log(" בקשה התקבלה ב- `/Message`");
           const filter=req.query;
           const message=await MessageServices.getAllMessages(filter)
     res.json(message);

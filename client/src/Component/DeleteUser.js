@@ -11,7 +11,7 @@ const DeleteUser = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('http://localhost:5000/users');  
+        const res = await fetch('/users');  
         if (!res.ok) throw new Error(`Network error: ${res.status}`);
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error('Response is not an array');
@@ -27,7 +27,7 @@ const DeleteUser = () => {
   
   const handleDelete = async (id) => {
     try {
-      const res = await fetch('http://localhost:5000/users/delete', {
+      const res = await fetch('/users/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),        
@@ -42,7 +42,7 @@ const DeleteUser = () => {
   };
 
   if (loading) return <p>טוען משתמשים...</p>;
-  if (error)   return <p style={{ color:'red' }}>שגיאה: {error}</p>;
+  if (error)   return <p style={{ color:'red' }}>Error: {error}</p>;
 
   
   return (

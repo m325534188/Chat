@@ -6,7 +6,6 @@ const connectDB=require('./configs/db');
 const userRouter = require('./routers/UserRouter');
 const mongoose = require('mongoose');
 const app=express();
-// const PORT=5000;
 require('dotenv').config();
 
 

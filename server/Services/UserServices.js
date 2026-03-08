@@ -2,7 +2,7 @@ const userRepo=require('../repositories/usersRepo.js');
 
 //Get All
 const getAllUsers=(filter)=>{
-    console.log("📢 קיבלנו filter ב-Service:", filter);
+    console.log("Received filter in Service:", filter);
 
    return userRepo.getAllUsers(filter);
 }

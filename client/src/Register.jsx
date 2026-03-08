@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
-import { useNavigate } from "react-router-dom";
+import WebSocketComponent from "./WebSocketComponent";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -9,23 +10,23 @@ const Register = () => {
   const navigate = useNavigate();
 
 useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
   if (storedUser && storedUser.name&&storedUser.password) {
-    navigate("/Register"); 
+    navigate("/WebSocketComponent"); 
   }
 }, [navigate]);
   
 
   const handleRegister = async (e) => {
     e.preventDefault();
-  
+  console.log("Register clicked");
     if (!username.trim() || !password.trim()) {
-      alert("נא להזין שם משתמש וסיסמה");
+      alert("Please enter a username and password");
       return;
     }
   
     try {
-      const response = await fetch("http://localhost:5000/users/register", {
+      const response = await fetch("/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,52 +40,56 @@ useEffect(() => {
         const userData = { name: username, password: password };
         
 
-        localStorage.setItem("user", JSON.stringify(userData));
+        sessionStorage.setItem("user", JSON.stringify(userData));
         
-        alert("נרשמת בהצלחה!");
+        alert("Registered successfully!");
         setUsername(username);
         navigate("/WebSocketComponent");
       } else {
-        alert(data.message || "שגיאה בהרשמה");
+        alert(data.message || "Error occurred while registering");
       }
     } catch (error) {
       console.error("Registration error:", error);
-      alert("שגיאה בשרת");
+      alert(" Error on server");
     }
   };
   
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>טופס הרשמה</h2>
+        <h2>Registration Form</h2>
         <form onSubmit={handleRegister}>
           <div className="input-group">
-            <label htmlFor="username">שם משתמש</label>
+            <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
-              placeholder="הכנס שם משתמש"
+              placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="input-group">
-            <label htmlFor="password">סיסמא</label>
+            <label htmlFor="password">Password</label>
             <input
   id="password"
   type="password"
-  placeholder="הכנס סיסמא"
+  placeholder="Enter password"
   value={password}
   onChange={(e) => setPassword(e.target.value)}
   autoComplete="current-password"
 />
           </div>
           <div className="input-group">
-            <label htmlFor="email">מייל</label>
-            <input type="text" id="email" placeholder="הכנס כתובת מייל" />
+            <label htmlFor="email">Email</label>
+            <input type="text" id="email" placeholder="Enter email" />
           </div>
-          <button type="submit" className="login-button">Sign Up</button> 
-          
+          <button
+  type="submit"
+  className="login-button"
+>
+  Sign Up
+</button> 
           </form>
       </div>
     </div>

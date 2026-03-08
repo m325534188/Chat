@@ -8,19 +8,22 @@ import  DeleteUser from './Component/DeleteUser';
 import "./chat-style.css";
 
 function App() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   return (
     <>
-    
+
  <Routes>
     <Route path='/' element={<LogIn/>}/>
     <Route path='/Register' element={<Register/>}/>
     <Route path='/WebSocketComponent' element={<WebSocketComponent/>}/>
     <Route path="/delete" element={<DeleteUser />} />
     <Route path="/delete/WebSocketComponent" element={<WebSocketComponent />} />
+    {/* <Route path="/login/WebSocketComponent" element={<WebSocketComponent />} /> */}
 
   </Routes>
+
+
     </>
   );
 }

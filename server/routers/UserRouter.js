@@ -8,7 +8,7 @@ const User = require('../models/userModel.js');
 
  router.get('/',async(req,res)=>{
      try{
-          console.log("📢 בקשה התקבלה ב- `/users`");
+          console.log(" בקשה התקבלה ב- `/users`");
           const filter=req.query;
           const users=await UserServices.getAllUsers(filter);
     res.json(users);
