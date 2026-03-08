@@ -196,22 +196,22 @@ const WebSocketComponent = () => {
     const reconnectDelay = 2000; // 2 seconds
 
     // Use environment variable or localhost for development
-    const wsUrl = process.env.REACT_APP_WS_URL || "ws://localhost:8080";
+    const wsUrl = process.env.REACT_APP_SERVER_URL;
     
     const connectWebSocket = () => {
-      console.log("🔌 Attempting WebSocket connection to:", wsUrl);
+      console.log("Attempting WebSocket connection to:", wsUrl);
       const socket = new WebSocket(wsUrl);
       const currentUsername = user.name;
 
       socket.onopen = () => {
-        console.log("✅ Connected to server");
+        console.log("Connected to server");
         setWsConnected(true);
         reconnectAttempts = 0;
       };
 
       socket.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        console.log("📩 Received message:", msg);
+        console.log("Received message:", msg);
         setMessages((prev) => {
           // בדוק אם הודעה זו רלוונטית למשתמש הנוכחי
           const isRelevant = 
@@ -232,12 +232,12 @@ const WebSocketComponent = () => {
       };
 
       socket.onerror = (error) => {
-        console.error("❌ WebSocket error:", error);
+        console.error("WebSocket error:", error);
         setWsConnected(false);
       };
 
       socket.onclose = () => {
-        console.log("🔴 WebSocket closed");
+        console.log("WebSocket closed");
         setWsConnected(false);
         
         // Try to reconnect
@@ -246,7 +246,7 @@ const WebSocketComponent = () => {
           console.log(`🔄 Reconnecting... (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
           setTimeout(connectWebSocket, reconnectDelay);
         } else {
-          console.error("❌ Failed to reconnect after", maxReconnectAttempts, "attempts");
+          console.error("Failed to reconnect after", maxReconnectAttempts, "attempts");
         }
       };
 
@@ -265,7 +265,7 @@ const WebSocketComponent = () => {
     if (!trimmed || !username) return;
 
     if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.error("⚠️ WebSocket not connected");
+      console.error("WebSocket not connected");
       alert("חיבור לשרת אבוד. יוצר חיבור מחדש...");
       return;
     }
@@ -276,7 +276,7 @@ const WebSocketComponent = () => {
       message: trimmed,
     };
 
-    console.log("📤 Sending message:", msgObject, "WebSocket state:", ws.readyState);
+    console.log("Sending message:", msgObject, "WebSocket state:", ws.readyState);
     try {
       ws.send(JSON.stringify(msgObject));
 
