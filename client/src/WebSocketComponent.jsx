@@ -29,7 +29,7 @@ const WebSocketComponent = () => {
     // Fetch users from the API
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/users`);
+        const response = await fetch("https://chat-server-kn0z.onrender.com/users");
         const data = await response.json();
         setUsers(data.map(u => u.username));
       } catch (err) {
@@ -47,7 +47,7 @@ const WebSocketComponent = () => {
     const maxReconnectAttempts = 5;
     const reconnectDelay = 2000;
 
-    const wsUrl = process.env.REACT_APP_SERVER_URL;
+    const wsUrl = "https://chat-server-kn0z.onrender.com";
 
     const connectWebSocket = () => {
       console.log("Connecting to WebSocket:", wsUrl);
