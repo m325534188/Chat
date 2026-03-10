@@ -7,7 +7,9 @@ const userRouter = require('./routers/UserRouter');
 const mongoose = require('mongoose');
 const app=express();
 require('dotenv').config();
-
+app.get("/", (req, res) => {
+  res.send("Chat server is running");
+});
 
 connectDB();
 
