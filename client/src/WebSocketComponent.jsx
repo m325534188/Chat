@@ -47,7 +47,7 @@ const WebSocketComponent = () => {
     const maxReconnectAttempts = 5;
     const reconnectDelay = 2000;
 
-    const wsUrl = "https://chat-server-kn0z.onrender.com";
+    const wsUrl = "wss://chat-server-kn0z.onrender.com";
 
     const connectWebSocket = () => {
       console.log("Connecting to WebSocket:", wsUrl);
