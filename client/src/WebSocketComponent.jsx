@@ -1,148 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { Link, useNavigate } from "react-router-dom"; 
-// import "./chat-style.css";
-// import "./App.css";
-// const WebSocketComponent = () => {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState("");
-//   const [username, setUsername] = useState("");
-//   const [hasName, setHasName] = useState(false);
-//   const [ws, setWs] = useState(null);
-//   const navigate = useNavigate(); 
-
-//   useEffect(() => {
-//     const user = JSON.parse(localStorage.getItem("user"));
-//     if (user && user.name) {
-//       setUsername(user.name);
-//       setHasName(true);
-//     } else {
-//       navigate("/Register"); 
-//     }
-
-//       const savedMessages = JSON.parse(localStorage.getItem("messages"));
-//       if (savedMessages && Array.isArray(savedMessages)) {
-//         setMessages(savedMessages);
-//       }
-    
-//     // const socket = new WebSocket("ws://localhost:8080");
-//     // socket.onopen = () => {
-//     //   console.log("Connected to server");
-//     // };
-
-//      const socket = new WebSocket("wss://chat-1-gm0e.onrender.com");
-//     socket.onopen = () => {
-//       console.log("Connected to server");
-//     };
-
-//     socket.onmessage = (event) => {
-//       const msg = JSON.parse(event.data);
-//       setMessages((prev) => {
-//         const updated = [...prev, msg];
-//         localStorage.setItem("messages", JSON.stringify(updated)); 
-//         return updated;
-//       });
-//     }
-//     socket.onerror = (error) => {
-//       console.error("WebSocket error:", error);
-//     };
-
-//     setWs(socket);
-
-//     return () => socket.close();
-//     console .log("WebSocket closed");
-//   }, [navigate]);
-
-//   const handleSend = () => {
-//     if (!input || !username || !ws) return;
-//   const msgObject = {
-//     sender: username,
-//     receiver: "general",
-//     message: input,
-//   };
-  
-//   ws.send(JSON.stringify(msgObject)); 
-  
-//   setMessages((prev) => {
-//     const updated = [...prev, msgObject]; 
-//     localStorage.setItem("messages", JSON.stringify(updated));
-//     return updated;
-//   });
-  
-//   setInput("");
-// }  
-
-// const currentUser = JSON.parse(localStorage.getItem("user"));
-
-// if (!currentUser) {
-
-//   window.location.href = "/Register"; 
-// }
-
-//   function handleLogout() {
-//     localStorage.removeItem("user");
-//     window.location.href = "/";
-
-//   }
-//   function clearChat() {
-//     localStorage.removeItem("messages");
-//     window.location.reload();
-//   }
-  
-//   return (
-//     <div style={{ padding: "20px" }}>
-//      <Link to="/delete">ניהול משתמשים</Link>
-//       <h2>Real-Time Chat</h2>
-//       <p>{username}</p>
-
-//       {!hasName ? (
-//         <div>
-//           <p>טוען שם משתמש...</p>
-//         </div>
-//       ) : (
-//         <>
-//           <div className="chat-box">
-//             <div style={{ marginTop: "50px" }}>
-//               {messages.map((msg, index) => (
-//                 <div
-//                   key={index}
-//                   className={`message-bubble ${
-//                     msg.sender === username ? "sent" : "received"
-//                   }`}
-//                 > 
-//                   <div><strong>{msg.sender}
-//                     <br></br>
-//                     </strong> {msg.message}</div>
-
-//                 </div>
-//               ))}
-//             </div>
-//             <div>
-//               <input
-//                 type="text"
-//                 placeholder="הקלד הודעה"
-//                 value={input}
-//                 onChange={(e) => setInput(e.target.value)}
-//                 onKeyDown={(e) => {
-//                   if (e.key === "Enter") {
-//                     handleSend();
-//                   }
-//                 }}
-//               />
-//             </div>
-//           </div>
-//           <button onClick={handleLogout}>התנתק</button><br>
-//           </br>
-//           <button onClick={clearChat}>נקה שיחה</button>
-
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default WebSocketComponent;
-
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./chat-style.css";
@@ -158,7 +13,7 @@ const WebSocketComponent = () => {
   const [selectedReceiver, setSelectedReceiver] = useState("general");
   const [channels] = useState(["general", "announcements", "random"]);
   const [users, setUsers] = useState([]);
-  const [chatMode, setChatMode] = useState("channels"); // "channels" or "users"
+  const [chatMode, setChatMode] = useState("channels");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -170,9 +25,11 @@ const WebSocketComponent = () => {
       navigate("/Register");
       return;
     }
+
+    // Fetch users from the API
     const fetchUsers = async () => {
       try {
-        const response = await fetch("/users");
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/users`);
         const data = await response.json();
         setUsers(data.map(u => u.username));
       } catch (err) {
@@ -181,24 +38,19 @@ const WebSocketComponent = () => {
     };
     fetchUsers();
 
-
     const loadMessagesForUser = (currentUsername) => {
-      const savedMessages = JSON.parse(sessionStorage.getItem("messages")) || [];
-      // סנן רק הודעות שרלוונטיות למשתמש הנוכחי
-      // ללא ערבוב של ערוצים וחלקות פרטיות
-      return savedMessages;
+      return JSON.parse(sessionStorage.getItem("messages")) || [];
     };
-    
     setMessages(loadMessagesForUser(user.name));
 
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 5;
-    const reconnectDelay = 2000; // 2 seconds
+    const reconnectDelay = 2000;
 
-    // Use environment variable or localhost for development
     const wsUrl = process.env.REACT_APP_SERVER_URL;
+
     const connectWebSocket = () => {
-      console.log("Attempting WebSocket connection to:", wsUrl);
+      console.log("Connecting to WebSocket:", wsUrl);
       const socket = new WebSocket(wsUrl);
       const currentUsername = user.name;
 
@@ -210,20 +62,16 @@ const WebSocketComponent = () => {
 
       socket.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        console.log("Received message:", msg);
-        setMessages((prev) => {
-          // בדוק אם הודעה זו רלוונטית למשתמש הנוכחי
-          const isRelevant = 
-            msg.receiver === "general" || 
-            msg.receiver === "announcements" || 
-            msg.receiver === "random" ||
-            msg.sender === currentUsername ||
-            msg.receiver === currentUsername;
-          
-          console.log("Is relevant?", isRelevant, "CurrentUser:", currentUsername, "Sender:", msg.sender, "Receiver:", msg.receiver);
-          
-          if (!isRelevant) return prev;
+        const isRelevant = 
+          msg.receiver === "general" || 
+          msg.receiver === "announcements" || 
+          msg.receiver === "random" ||
+          msg.sender === currentUsername ||
+          msg.receiver === currentUsername;
 
+        if (!isRelevant) return;
+
+        setMessages(prev => {
           const updated = [...prev, msg];
           sessionStorage.setItem("messages", JSON.stringify(updated));
           return updated;
@@ -238,14 +86,9 @@ const WebSocketComponent = () => {
       socket.onclose = () => {
         console.log("WebSocket closed");
         setWsConnected(false);
-        
-        // Try to reconnect
         if (reconnectAttempts < maxReconnectAttempts) {
           reconnectAttempts++;
-          console.log(`🔄 Reconnecting... (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
           setTimeout(connectWebSocket, reconnectDelay);
-        } else {
-          console.error("Failed to reconnect after", maxReconnectAttempts, "attempts");
         }
       };
 
@@ -255,17 +98,15 @@ const WebSocketComponent = () => {
     connectWebSocket();
 
     return () => {
-      console.log("Cleaning up WebSocket");
+      if (ws) ws.close();
     };
   }, [navigate]);
 
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed || !username) return;
-
     if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket not connected");
-      alert("חיבור לשרת אבוד. יוצר חיבור מחדש...");
+      alert("חיבור לשרת אבוד. מנסה שוב...");
       return;
     }
 
@@ -275,20 +116,15 @@ const WebSocketComponent = () => {
       message: trimmed,
     };
 
-    console.log("Sending message:", msgObject, "WebSocket state:", ws.readyState);
-    try {
-      ws.send(JSON.stringify(msgObject));
+    ws.send(JSON.stringify(msgObject));
 
-      setMessages((prev) => {
-        const updated = [...prev, msgObject];
-        sessionStorage.setItem("messages", JSON.stringify(updated));
-        return updated;
-      });
+    setMessages(prev => {
+      const updated = [...prev, msgObject];
+      sessionStorage.setItem("messages", JSON.stringify(updated));
+      return updated;
+    });
 
-      setInput("");
-    } catch (err) {
-      console.error("Error sending message:", err);
-    }
+    setInput("");
   };
 
   const handleLogout = () => {
@@ -308,37 +144,23 @@ const WebSocketComponent = () => {
       <h2>Real-Time Chat</h2>
       <p>משתמש: {username}</p>
       {wsConnected ? (
-        <p style={{ color: "green" }}>✅ מחובר לשרת</p>
+        <p style={{ color: "green" }}> מחובר לשרת</p>
       ) : (
-        <p style={{ color: "red" }}>🔴 מנותק מהשרת - הקליינט מנסה להתחבר מחדש...</p>
+        <p style={{ color: "red" }}>מנותק מהשרת</p>
       )}
 
-      {hasName ? (
+      {hasName && (
         <>
           <div style={{ marginBottom: "20px" }}>
-            <button 
-              onClick={() => setChatMode("channels")} 
-              style={{ marginRight: "10px", fontWeight: chatMode === "channels" ? "bold" : "normal" }}
-            >
-              📢 ערוצים
-            </button>
-            <button 
-              onClick={() => setChatMode("users")} 
-              style={{ fontWeight: chatMode === "users" ? "bold" : "normal" }}
-            >
-              👥 שיחות פרטיות
-            </button>
+            <button onClick={() => setChatMode("channels")} style={{ marginRight: "10px", fontWeight: chatMode === "channels" ? "bold" : "normal" }}>📢 ערוצים</button>
+            <button onClick={() => setChatMode("users")} style={{ fontWeight: chatMode === "users" ? "bold" : "normal" }}>👥 שיחות פרטיות</button>
           </div>
 
           {chatMode === "channels" ? (
             <div style={{ marginBottom: "15px" }}>
               <label>בחר ערוץ: </label>
               <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
-                {channels.map(channel => (
-                  <option key={channel} value={channel}>
-                    {channel}
-                  </option>
-                ))}
+                {channels.map(channel => <option key={channel} value={channel}>{channel}</option>)}
               </select>
               <span style={{ marginLeft: "10px", color: "green" }}>✓ {selectedReceiver}</span>
             </div>
@@ -347,11 +169,7 @@ const WebSocketComponent = () => {
               <label>בחר משתמש: </label>
               <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
                 <option value="">-- בחר משתמש --</option>
-                {users.filter(u => u !== username).map(user => (
-                  <option key={user} value={user}>
-                    {user}
-                  </option>
-                ))}
+                {users.filter(u => u !== username).map(user => <option key={user} value={user}>{user}</option>)}
               </select>
               {selectedReceiver && <span style={{ marginLeft: "10px", color: "green" }}>✓ {selectedReceiver}</span>}
             </div>
@@ -360,23 +178,10 @@ const WebSocketComponent = () => {
           <div className="chat-box">
             <div style={{ marginTop: "50px", maxHeight: "400px", overflowY: "auto" }}>
               {messages
-                .filter(msg => 
-                  chatMode === "channels" 
-                    ? msg.receiver === selectedReceiver
-                    : (msg.receiver === selectedReceiver || msg.sender === selectedReceiver)
-                )
-                .map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`message-bubble ${
-                      msg.sender === username ? "sent" : "received"
-                    }`}
-                  >
-                    <div>
-                      <strong>{msg.sender}</strong>
-                      <br />
-                      {msg.message}
-                    </div>
+                .filter(msg => chatMode === "channels" ? msg.receiver === selectedReceiver : msg.sender === selectedReceiver || msg.receiver === selectedReceiver)
+                .map((msg, i) => (
+                  <div key={i} className={`message-bubble ${msg.sender === username ? "sent" : "received"}`}>
+                    <div><strong>{msg.sender}</strong><br />{msg.message}</div>
                   </div>
                 ))}
             </div>
@@ -385,32 +190,17 @@ const WebSocketComponent = () => {
                 type="text"
                 placeholder="הקלד הודעה"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
                 style={{ width: "80%", padding: "8px" }}
               />
-              <button 
-                onClick={handleSend}
-                style={{ marginLeft: "10px", padding: "8px 15px" }}
-              >
-                שלח
-              </button>
+              <button onClick={handleSend} style={{ marginLeft: "10px", padding: "8px 15px" }}>שלח</button>
             </div>
           </div>
-          <button onClick={handleLogout} style={{ marginTop: "15px", marginRight: "10px" }}>
-            התנתק
-          </button>
-          <button onClick={clearChat} style={{ marginTop: "15px" }}>
-            נקה שיחה
-          </button>
+
+          <button onClick={handleLogout} style={{ marginTop: "15px", marginRight: "10px" }}>התנתק</button>
+          <button onClick={clearChat} style={{ marginTop: "15px" }}>נקה שיחה</button>
         </>
-      ) : (
-        <p>טוען שם משתמש...</p>
       )}
     </div>
   );
