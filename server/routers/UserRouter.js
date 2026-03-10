@@ -4,7 +4,36 @@ const router=express.Router();
 
 const UserServices=require('../Services/UserServices.js');
 
-const User = require('../models/userModel.js'); 
+const User = require('../models/userModel.js');
+
+router.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: "שם משתמש כבר קיים" });
+    }
+        const newUser = new User({ username, password });
+    await newUser.save();
+    res.status(201).json({ message: 'נרשמת בהצלחה', user: newUser }); 
+  } catch (error) {
+    res.status(500).json({ message: 'שגיאה בשרת' });
+  }
+});
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log("Login:", username, password);
+  const user = await User.findOne({ username });
+  if (!user) {
+    return res.status(400).json({ message: "שם משתמש לא קיים" });
+  }
+  
+  if (user.password !== password) {
+    return res.status(400).json({ message: "סיסמא לא נכונה" });
+  }
+  res.status(200).json({ message: "התחברת בהצלחה", user });
+});
 
  router.get('/',async(req,res)=>{
      try{
@@ -27,8 +56,6 @@ router.get('/:id',async(req,res)=>{
 }
 })
 
-
-
 router.delete('/delete', async (req, res) => {
   try {
     const { id } = req.body;
@@ -42,38 +69,6 @@ router.delete('/delete', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "שם משתמש כבר קיים" });
-    }
-        const newUser = new User({ username, password });
-    await newUser.save();
-    res.status(201).json({ message: 'נרשמת בהצלחה', user: newUser }); 
-  } catch (error) {
-    res.status(500).json({ message: 'שגיאה בשרת' });
-  }
-});
-   
-
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log("Login:", username, password);
-  const user = await User.findOne({ username });
-  if (!user) {
-    return res.status(400).json({ message: "שם משתמש לא קיים" });
-  }
-  
-  if (user.password !== password) {
-    return res.status(400).json({ message: "סיסמא לא נכונה" });
-  }
-  res.status(200).json({ message: "התחברת בהצלחה", user });
-
-  });
-
 
 module.exports = router;
 

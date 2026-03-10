@@ -10,10 +10,14 @@ const userRouter = require("./routers/UserRouter");
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ 
+  server,
+  perMessageDeflate: false
+});
 
 //connect db
-mongoose.connect("mongodb+srv://admin:chat%21491@cluster0.tvqct.mongodb.net/miri?retryWrites=true&w=majority", { 
+const mongoURL = process.env.MONGODB_URI || "mongodb://localhost:27017/chatapp";
+mongoose.connect(mongoURL, { 
   useNewUrlParser: true, 
   useUnifiedTopology: true 
 }).then(() => console.log("Connected to MongoDB"))
@@ -74,11 +78,20 @@ wss.on("connection", function connection(ws) {
 });
 
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 
 app.use("/users", userRouter);
 app.use("/messages", messageRouter);
+
+// Add a simple health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
