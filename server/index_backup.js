@@ -1,32 +1,25 @@
-const express=require('express');
-
-const cors=require('cors');
-const messageRouter=require('./routers/messageRouter');
-const connectDB=require('./configs/db'); 
+require('dotenv').config(); // קודם כל נטען הסביבה
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./configs/db');
 const userRouter = require('./routers/UserRouter');
-const mongoose = require('mongoose');
-const app=express();
-require('dotenv').config();
+const messageRouter = require('./routers/messageRouter');
+
+connectDB(); // חיבור ל‑MongoDB
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/users', userRouter);
+app.use('/messages', messageRouter);
+
 app.get("/", (req, res) => {
   res.send("Chat server is running");
 });
 
-connectDB();
-
-app.use(cors());
-
-app.use(express.json());
-
-app.use('/users', userRouter);
-
-app.use('/messages', messageRouter); 
-
-// app.listen(5000, 'localhost', () => {
-//   console.log("Server running on http://localhost:5000");
-// });
-
-
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
