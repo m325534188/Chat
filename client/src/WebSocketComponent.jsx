@@ -197,7 +197,6 @@ const WebSocketComponent = () => {
 
     // Use environment variable or localhost for development
     const wsUrl = process.env.REACT_APP_SERVER_URL;
-    
     const connectWebSocket = () => {
       console.log("Attempting WebSocket connection to:", wsUrl);
       const socket = new WebSocket(wsUrl);

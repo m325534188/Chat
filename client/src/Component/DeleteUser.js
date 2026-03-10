@@ -1,5 +1,5 @@
 
-importgit { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 //import WebSocketComponent from '../WebSocketComponent'; // Adjust the path as necessary
 const DeleteUser = () => {
