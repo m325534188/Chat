@@ -26,7 +26,7 @@ useEffect(() => {
     }
   
     try {
-      const response = await fetch("https://chat-server-kn0z.onrender.com/users/register", {
+      const response = await fetch("http://localhost:3001/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

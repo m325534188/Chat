@@ -11,7 +11,7 @@ const WebSocketComponent = () => {
   const [ws, setWs] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [selectedReceiver, setSelectedReceiver] = useState("general");
-  const [channels] = useState(["general", "announcements", "random"]);
+  const [channels] = useState(["general", "announcements"]);
   const [users, setUsers] = useState([]);
   const [chatMode, setChatMode] = useState("channels");
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const WebSocketComponent = () => {
     // Fetch users from the API
     const fetchUsers = async () => {
       try {
-        const response = await fetch("https://chat-server-kn0z.onrender.com/users");
+        const response = await fetch("http://localhost:3001/users");
         const data = await response.json();
         setUsers(data.map(u => u.username));
       } catch (err) {
@@ -47,7 +47,7 @@ const WebSocketComponent = () => {
     const maxReconnectAttempts = 5;
     const reconnectDelay = 2000;
 
-    const wsUrl = "wss://chat-server-kn0z.onrender.com";
+    const wsUrl = "ws://localhost:3001";
 
     const connectWebSocket = () => {
       console.log("Connecting to WebSocket:", wsUrl);
@@ -117,13 +117,6 @@ const WebSocketComponent = () => {
     };
 
     ws.send(JSON.stringify(msgObject));
-
-    setMessages(prev => {
-      const updated = [...prev, msgObject];
-      sessionStorage.setItem("messages", JSON.stringify(updated));
-      return updated;
-    });
-
     setInput("");
   };
 
@@ -139,67 +132,72 @@ const WebSocketComponent = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Link to="/delete">ניהול משתמשים</Link>
-      <h2>Real-Time Chat</h2>
-      <p>משתמש: {username}</p>
-      {wsConnected ? (
-        <p style={{ color: "green" }}> מחובר לשרת</p>
-      ) : (
-        <p style={{ color: "red" }}>מנותק מהשרת</p>
-      )}
+    <div className="chat-container">
+      <div className="chat-header">
+        <h2> צ'אט בזמן אמת</h2>
+        <p>משתמש: <strong>{username}</strong></p>
+        {wsConnected ? (
+          <p><span className="status-indicator online"></span>מחובר לשרת</p>
+        ) : (
+          <p><span className="status-indicator offline"></span>מנותק מהשרת</p>
+        )}
+        <Link to="/delete" style={{ color: "black", textDecoration: "none", marginTop: "10px", display: "inline-block" }}> ניהול משתמשים</Link>
+      </div>
 
       {hasName && (
         <>
-          <div style={{ marginBottom: "20px" }}>
-            <button onClick={() => setChatMode("channels")} style={{ marginRight: "10px", fontWeight: chatMode === "channels" ? "bold" : "normal" }}>📢 ערוצים</button>
-            <button onClick={() => setChatMode("users")} style={{ fontWeight: chatMode === "users" ? "bold" : "normal" }}>👥 שיחות פרטיות</button>
+          <div className="mode-buttons">
+            <button onClick={() => setChatMode("channels")} style={{ backgroundColor: chatMode === "channels" ? "white" : "rgba(255, 255, 255, 0.2)", color: chatMode === "channels" ? "#667eea" : "black" }}>📢 ערוצים</button>
+            <button onClick={() => setChatMode("users")} style={{ backgroundColor: chatMode === "users" ? "white" : "rgba(255, 255, 255, 0.2)", color: chatMode === "users" ? "#667eea" : "black" }}>👥 שיחות פרטיות</button>
           </div>
 
-          {chatMode === "channels" ? (
-            <div style={{ marginBottom: "15px" }}>
-              <label>בחר ערוץ: </label>
-              <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
-                {channels.map(channel => <option key={channel} value={channel}>{channel}</option>)}
-              </select>
-              <span style={{ marginLeft: "10px", color: "green" }}>✓ {selectedReceiver}</span>
-            </div>
-          ) : (
-            <div style={{ marginBottom: "15px" }}>
-              <label>בחר משתמש: </label>
-              <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
-                <option value="">-- בחר משתמש --</option>
-                {users.filter(u => u !== username).map(user => <option key={user} value={user}>{user}</option>)}
-              </select>
-              {selectedReceiver && <span style={{ marginLeft: "10px", color: "green" }}>✓ {selectedReceiver}</span>}
-            </div>
-          )}
+          <div className="chat-selector">
+            {chatMode === "channels" ? (
+              <>
+                <label style={{ color: "black", fontWeight: "bold" }}>בחר ערוץ: </label>
+                <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
+                  {channels.map(channel => <option key={channel} value={channel}>{channel}</option>)}
+                </select>
+                <span style={{ color: "white" }}>✓ {selectedReceiver}</span>
+              </>
+            ) : (
+              <>
+                <label style={{ color: "white", fontWeight: "bold" }}>בחר משתמש: </label>
+                <select value={selectedReceiver} onChange={(e) => setSelectedReceiver(e.target.value)}>
+                  <option value="">-- בחר משתמש --</option>
+                  {users.filter(u => u !== username).map(user => <option key={user} value={user}>{user}</option>)}
+                </select>
+                {selectedReceiver && <span style={{ color: "white" }}>✓ {selectedReceiver}</span>}
+              </>
+            )}
+          </div>
 
           <div className="chat-box">
-            <div style={{ marginTop: "50px", maxHeight: "400px", overflowY: "auto" }}>
-              {messages
-                .filter(msg => chatMode === "channels" ? msg.receiver === selectedReceiver : msg.sender === selectedReceiver || msg.receiver === selectedReceiver)
-                .map((msg, i) => (
-                  <div key={i} className={`message-bubble ${msg.sender === username ? "sent" : "received"}`}>
-                    <div><strong>{msg.sender}</strong><br />{msg.message}</div>
-                  </div>
-                ))}
-            </div>
-            <div style={{ marginTop: "15px" }}>
-              <input
-                type="text"
-                placeholder="הקלד הודעה"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
-                style={{ width: "80%", padding: "8px" }}
-              />
-              <button onClick={handleSend} style={{ marginLeft: "10px", padding: "8px 15px" }}>שלח</button>
-            </div>
+            {messages
+              .filter(msg => chatMode === "channels" ? msg.receiver === selectedReceiver : msg.sender === selectedReceiver || msg.receiver === selectedReceiver)
+              .map((msg, i) => (
+                <div key={i} className={`message-bubble ${msg.sender === username ? "sent" : "received"}`}>
+                  <strong>{msg.sender}</strong>
+                  <div>{msg.message}</div>
+                </div>
+              ))}
           </div>
 
-          <button onClick={handleLogout} style={{ marginTop: "15px", marginRight: "10px" }}>התנתק</button>
-          <button onClick={clearChat} style={{ marginTop: "15px" }}>נקה שיחה</button>
+          <div className="input-area">
+            <input
+              type="text"
+              placeholder="הקלד הודעה..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
+            />
+            <button onClick={handleSend}> שלח</button>
+          </div>
+
+          <div className="chat-controls">
+            <button onClick={handleLogout}> התنתק</button>
+            <button onClick={clearChat}> נקה שיחה</button>
+          </div>
         </>
       )}
     </div>

@@ -15,7 +15,6 @@ const wss = new WebSocket.Server({
   perMessageDeflate: false
 });
 
-//connect db
 const mongoURL = process.env.MONGODB_URI || "mongodb://localhost:27017/chatapp";
 mongoose.connect(mongoURL, { 
   useNewUrlParser: true, 
@@ -23,17 +22,14 @@ mongoose.connect(mongoURL, {
 }).then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Define Message schema and model
 const messageSchema = new mongoose.Schema({
   sender: String,
   receiver: String,
   message: String,
   timestamp: { type: Date, default: Date.now },
 });
-// const Message = mongoose.model("Message", messageSchema);
 const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
 
-// WebSocket handling
 const clientMap = new Map(); 
 
 wss.on("connection", function connection(ws) {
@@ -46,20 +42,16 @@ wss.on("connection", function connection(ws) {
       console.log("🔹 Server received:", { sender, receiver, message: msgContent });
       currentUser = sender;
       
-      // שמור בבסיס הנתונים
       const newMessage = new Message({ sender, receiver, message: msgContent });
       await newMessage.save();
 
-      // שלח להודעות ערוציים לכולם, ופרטיות רק למטרה
       console.log("Broadcasting to", wss.clients.size, "clients");
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-          // ערוץ - שלח לכולם
           if (receiver === "general" || receiver === "announcements" || receiver === "random") {
             client.send(JSON.stringify({ sender, receiver, message: msgContent }));
           }
-          // שיחה פרטית - שלח רק לנמען ולשולח
-          // (אנו לא יודעים מי החיבור השני, אז שלח לכולם וקליינט יסנן)
+          
           else {
             client.send(JSON.stringify({ sender, receiver, message: msgContent }));
           }
@@ -88,12 +80,11 @@ app.use(express.json());
 app.use("/users", userRouter);
 app.use("/messages", messageRouter);
 
-// Add a simple health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server (Express + WebSocket) is running on port ${PORT}`);
 });
